@@ -19,15 +19,16 @@ import {
   ResourceState,
 } from "@/types/game";
 import { BUILDINGS, canAfford, canConsume, deductCost, addResource } from "@/systems/ResourceSystem";
+import { EXPANSIONS } from "@/systems/LandExpansion";
 import { loadGame, getOfflineTime, hasSave } from "@/systems/SaveSystem";
 import { useAutosave } from "@/hooks/useAutosave";
 
-// Create initial grid (7x7)
-function createInitialGrid(): Plot[][] {
-  return Array(GRID_SIZE)
+// Create initial grid with given size
+function createInitialGrid(size: number): Plot[][] {
+  return Array(size)
     .fill(null)
     .map((_, row) =>
-      Array(GRID_SIZE)
+      Array(size)
         .fill(null)
         .map((__, col) => ({
           row,
@@ -41,7 +42,7 @@ function createInitialGrid(): Plot[][] {
 // Initial game state
 const initialState: GameState = {
   resources: { ...INITIAL_RESOURCES },
-  grid: createInitialGrid(),
+  grid: createInitialGrid(GRID_SIZE),
   buildings: [],
   stats: {
     totalClicks: 0,
@@ -50,6 +51,7 @@ const initialState: GameState = {
     playTime: 0,
   },
   lastUpdate: Date.now(),
+  expansionLevel: 0,
 };
 
 // Extended action type
@@ -356,6 +358,20 @@ function gameReducer(state: GameState, action: ExtendedGameAction): GameState {
           playTime: state.stats.playTime + offlineTime,
         },
         lastUpdate: Date.now(),
+      };
+    }
+
+    case "EXPAND_COLONY": {
+      const { level } = action.payload;
+      const expansion = EXPANSIONS[level];
+      if (!expansion) return state;
+
+      const newGrid = createInitialGrid(expansion.gridSize);
+
+      return {
+        ...state,
+        grid: newGrid,
+        expansionLevel: level,
       };
     }
 

@@ -14,9 +14,9 @@ import { FloatingTextContainer } from "@/components/game/FloatingNumber";
 import { BuildingInfoPanel } from "@/components/game/BuildingInfoPanel";
 import { Building } from "@/types/game";
 import { TutorialHints } from "@/components/game/TutorialHints";
+import { ExpansionPanel } from "@/components/game/ExpansionPanel";
 
 const CELL_SIZE = 64;
-const WORLD_SIZE = 7 * CELL_SIZE;
 const MIN_ZOOM = 0.5;
 const MAX_ZOOM = 2;
 
@@ -39,9 +39,11 @@ function GamePreview() {
   const [selectedBuilding, setSelectedBuilding] = useState<BuildingType | null>(null);
   const [tradeOpen, setTradeOpen] = useState(false);
   const [buildingInfoBuilding, setBuildingInfoBuilding] = useState<Building | null>(null);
+  const [expansionOpen, setExpansionOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
   const grid = useGameSelector((s) => s.grid);
+  const WORLD_SIZE = grid.length * CELL_SIZE;
 
   const handleMouseDown = (e: React.MouseEvent) => {
     if (e.button === 0) {
@@ -208,8 +210,8 @@ function GamePreview() {
               backgroundSize: "32px 32px",
               padding: "4px",
               display: "grid",
-              gridTemplateColumns: `repeat(7, ${CELL_SIZE}px)`,
-              gridTemplateRows: `repeat(7, ${CELL_SIZE}px)`,
+              gridTemplateColumns: `repeat(${grid.length}, ${CELL_SIZE}px)`,
+              gridTemplateRows: `repeat(${grid.length}, ${CELL_SIZE}px)`,
             }}
           >
             {grid.map((row, rowIndex) =>
@@ -340,6 +342,25 @@ function GamePreview() {
 
       {/* Tutorial Hints */}
       <TutorialHints />
+
+      {/* Expansion Panel */}
+      <ExpansionPanel isOpen={expansionOpen} onClose={() => setExpansionOpen(false)} />
+
+      {/* Expand Button */}
+      <button
+        onClick={() => setExpansionOpen(true)}
+        className="pixel-btn"
+        style={{
+          position: "fixed",
+          top: "80px",
+          right: "20px",
+          zIndex: 100,
+          padding: "8px 12px",
+          fontSize: "10px",
+        }}
+      >
+        Expand
+      </button>
     </GameFrame>
   );
 }

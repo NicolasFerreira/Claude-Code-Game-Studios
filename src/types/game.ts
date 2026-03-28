@@ -65,7 +65,7 @@ export interface Plot {
 // Full game state
 export interface GameState {
   resources: ResourceState;
-  grid: Plot[][]; // 7x7 = 49 plots
+  grid: Plot[][];
   buildings: Building[];
   stats: {
     totalClicks: number;
@@ -74,6 +74,7 @@ export interface GameState {
     playTime: number; // seconds
   };
   lastUpdate: number; // timestamp
+  expansionLevel: number; // 0 = 7x7, 1 = 9x9, 2 = 11x11, 3 = 13x13
 }
 
 // Actions for the reducer
@@ -85,7 +86,8 @@ export type GameAction =
   | { type: "UPGRADE_BUILDING"; payload: { buildingId: string } }
   | { type: "CLICK_PLOT"; payload: { row: number; col: number } }
   | { type: "OFFLINE_PRODUCTION"; payload: { offlineTime: number } }
-  | { type: "REMOVE_RESOURCE"; payload: { resource: ResourceType; amount: number } };
+  | { type: "REMOVE_RESOURCE"; payload: { resource: ResourceType; amount: number } }
+  | { type: "EXPAND_COLONY"; payload: { level: number } };
 
 // Constants
 export const GRID_SIZE = 7;
