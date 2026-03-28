@@ -27,6 +27,7 @@ bin/
 obj/
 out/
 dist/
+.next/
 *.exe
 *.dll
 *.so

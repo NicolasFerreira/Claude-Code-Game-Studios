@@ -1,0 +1,306 @@
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Space+Grotesk:wght@400;500;600;700&display=swap');
+
+@import "tailwindcss";
+
+:root {
+  /* Lunar Theme */
+  --color-bg: #0d0d1a;
+  --color-surface: #2d3a4a;
+  --color-border: #334155;
+
+  /* Resource Colors */
+  --color-ice: #22d3ee;
+  --color-water: #38bdf8;
+  --color-solar: #fbbf24;
+  --color-mineral: #a78bfa;
+  --color-food: #4ade80;
+
+  /* UI Colors */
+  --color-text: #e2e8f0;
+  --color-text-dim: #94a3b8;
+  --color-text-muted: #64748b;
+
+  /* Fonts */
+  --font-pixel: 'Press Start 2P', monospace;
+  --font-body: 'Space Grotesk', system-ui, sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html,
+body {
+  font-family: var(--font-body);
+  background: var(--color-bg);
+  color: var(--color-text);
+  min-height: 100vh;
+  height: 100%;
+  -webkit-font-smoothing: antialiased;
+  overflow: hidden;
+}
+
+/* Prevent white flash on load */
+#__next,
+main {
+  background: var(--color-bg) !important;
+  min-height: 100vh;
+}
+
+img {
+  image-rendering: pixelated;
+  -webkit-user-drag: none;
+  user-select: none;
+}
+
+button {
+  font-family: inherit;
+  cursor: pointer;
+}
+
+button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Pixel font utility */
+.font-pixel {
+  font-family: var(--font-pixel);
+}
+
+/* Balance text style (like Sunflower Land) */
+.balance-text {
+  color: white;
+  font-family: var(--font-pixel);
+  letter-spacing: 1px;
+  text-shadow:
+    -1px -1px 0 black,
+    1px -1px 0 black,
+    -1px 1px 0 black,
+    1px 1px 0 black,
+    -2px 0 0 black,
+    2px 0 0 black,
+    0 -2px 0 black,
+    0 2px 0 black;
+}
+
+/* Animations */
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+
+@keyframes ready-pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes floatUp {
+  0% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(-40px);
+    opacity: 0;
+  }
+}
+
+.animate-pulse { animation: pulse 2s ease-in-out infinite; }
+.animate-float { animation: float 3s ease-in-out infinite; }
+.animate-ready { animation: ready-pulse 1.5s ease-in-out infinite; }
+.animate-slide-in { animation: slideIn 200ms ease-out; }
+.animate-float-up { animation: floatUp 800ms ease-out forwards; }
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-bg);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-surface);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-border);
+}
+
+/* ============================================
+   PIXEL ART GAME UI STYLES
+   Sunflower Land / Pixels aesthetic
+   ============================================ */
+
+/* Pixel-art button - chunky beveled style */
+.pixel-btn {
+  position: relative;
+  font-family: var(--font-pixel);
+  font-size: 10px;
+  padding: 10px 16px;
+  color: #e2e8f0;
+  background: linear-gradient(180deg, #3d4f5f 0%, #2d3a4a 50%, #1e293b 100%);
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  box-shadow:
+    inset 0 2px 0 rgba(255, 255, 255, 0.15),
+    inset 0 -2px 0 rgba(0, 0, 0, 0.3),
+    0 4px 0 #0f172a,
+    0 6px 8px rgba(0, 0, 0, 0.4);
+  transition: transform 0.1s, box-shadow 0.1s;
+}
+
+.pixel-btn::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 4px;
+  border: 2px solid #475569;
+  border-bottom-color: #1e293b;
+  border-right-color: #1e293b;
+  pointer-events: none;
+}
+
+.pixel-btn:hover {
+  transform: translateY(-2px);
+  box-shadow:
+    inset 0 2px 0 rgba(255, 255, 255, 0.2),
+    inset 0 -2px 0 rgba(0, 0, 0, 0.3),
+    0 6px 0 #0f172a,
+    0 8px 12px rgba(0, 0, 0, 0.5);
+}
+
+.pixel-btn:active {
+  transform: translateY(2px);
+  box-shadow:
+    inset 0 2px 0 rgba(0, 0, 0, 0.2),
+    inset 0 -2px 0 rgba(255, 255, 255, 0.1),
+    0 2px 0 #0f172a,
+    0 3px 4px rgba(0, 0, 0, 0.3);
+}
+
+.pixel-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Pixel-art panel - inset container style */
+.pixel-panel {
+  position: relative;
+  background: linear-gradient(180deg, #1e293b 0%, #151c2c 100%);
+  border-radius: 8px;
+  border: 3px solid #334155;
+  box-shadow:
+    inset 0 2px 4px rgba(0, 0, 0, 0.5),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.05),
+    0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+.pixel-panel::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 5px;
+  border: 2px solid rgba(255, 255, 255, 0.05);
+  border-bottom-color: rgba(0, 0, 0, 0.2);
+  border-right-color: rgba(0, 0, 0, 0.2);
+  pointer-events: none;
+}
+
+/* Pixel panel with accent color */
+.pixel-panel--accent {
+  border-color: var(--accent-color, #22d3ee);
+}
+
+.pixel-panel--accent::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: var(--accent-color, #22d3ee);
+  border-radius: 5px 5px 0 0;
+  opacity: 0.8;
+}
+
+/* Game container - wraps main game area */
+.game-container {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  background: radial-gradient(ellipse at center, #151528 0%, #0d0d1a 100%);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+/* Inset well - for containing game canvas */
+.game-well {
+  position: absolute;
+  inset: 8px;
+  background: #0a0a14;
+  border-radius: 4px;
+  border: 2px solid #1e293b;
+  box-shadow: inset 0 4px 16px rgba(0, 0, 0, 0.8);
+  overflow: hidden;
+}
+
+/* Decorative pixel border frame */
+.pixel-frame {
+  position: relative;
+  padding: 16px;
+}
+
+.pixel-frame::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border: 4px solid #334155;
+  border-radius: 8px;
+  box-shadow:
+    inset 0 0 0 2px #0d0d1a,
+    inset 0 0 0 4px #1e293b;
+  pointer-events: none;
+}
+
+/* Tooltip / popup styling */
+.pixel-tooltip {
+  position: absolute;
+  background: linear-gradient(180deg, #2d3a4a 0%, #1e293b 100%);
+  border: 2px solid #475569;
+  border-radius: 4px;
+  padding: 8px 12px;
+  font-size: 12px;
+  color: #e2e8f0;
+  box-shadow:
+    0 4px 12px rgba(0, 0, 0, 0.5),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  z-index: 1000;
+  pointer-events: none;
+}
