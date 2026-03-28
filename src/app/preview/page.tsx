@@ -13,6 +13,7 @@ import { Notifications } from "@/components/game/Notifications";
 import { FloatingTextContainer } from "@/components/game/FloatingNumber";
 import { BuildingInfoPanel } from "@/components/game/BuildingInfoPanel";
 import { Building } from "@/types/game";
+import { TutorialHints } from "@/components/game/TutorialHints";
 
 const CELL_SIZE = 64;
 const WORLD_SIZE = 7 * CELL_SIZE;
@@ -336,6 +337,9 @@ function GamePreview() {
         isOpen={buildingInfoBuilding !== null}
         onClose={() => setBuildingInfoBuilding(null)}
       />
+
+      {/* Tutorial Hints */}
+      <TutorialHints />
     </GameFrame>
   );
 }
