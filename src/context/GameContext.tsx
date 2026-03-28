@@ -13,10 +13,12 @@ import {
   Building,
   GRID_SIZE,
   INITIAL_RESOURCES,
+  RESOURCE_CAPS,
   BuildingType,
   ResourceType,
+  ResourceState,
 } from "@/types/game";
-import { BUILDINGS, canAfford, deductCost } from "@/systems/ResourceSystem";
+import { BUILDINGS, canAfford, canConsume, deductCost, addResource } from "@/systems/ResourceSystem";
 import { loadGame, getOfflineTime, hasSave } from "@/systems/SaveSystem";
 import { useAutosave } from "@/hooks/useAutosave";
 
@@ -31,7 +33,7 @@ function createInitialGrid(): Plot[][] {
           row,
           col,
           building: null,
-          resourceDrops: ["ice"] as ResourceType[], // all plots can drop ice
+          resourceDrops: ["ice"] as ResourceType[],
         }))
     );
 }
@@ -50,8 +52,73 @@ const initialState: GameState = {
   lastUpdate: Date.now(),
 };
 
-// Extended action type including REMOVE_RESOURCE and OFFLINE_PRODUCTION
-type ExtendedGameAction = GameAction | { type: "REMOVE_RESOURCE"; payload: { resource: string; amount: number } } | { type: "OFFLINE_PRODUCTION"; payload: { offlineTime: number } };
+// Extended action type
+type ExtendedGameAction = GameAction | { type: "REMOVE_RESOURCE"; payload: { resource: ResourceType; amount: number } };
+
+// Process production for a single building
+function processBuildingProduction(
+  building: Building,
+  deltaTime: number,
+  resources: ResourceState
+): { resources: ResourceState; building: Building } {
+  const def = BUILDINGS[building.type];
+
+  // Check if building has consumption requirements
+  if (Object.keys(def.consumption).length > 0) {
+    // Can it consume?
+    if (!canConsume(def.consumption, resources)) {
+      // Building is starved - no production
+      return {
+        resources,
+        building: { ...building, working: false },
+      };
+    }
+
+    // Deduct consumption (scaled by level and time)
+    let newResources = { ...resources };
+    for (const [resource, amount] of Object.entries(def.consumption)) {
+      if (amount && def.consumptionInterval > 0) {
+        const consumed = (amount * building.level * deltaTime) / def.consumptionInterval;
+        newResources[resource as ResourceType] = Math.max(0, newResources[resource as ResourceType] - consumed);
+      }
+    }
+
+    // Add production (scaled by level * 1.8 and time)
+    for (const [resource, amount] of Object.entries(def.production)) {
+      if (amount && def.productionInterval > 0) {
+        const produced = (amount * building.level * 1.8 * deltaTime) / def.productionInterval;
+        const cap = RESOURCE_CAPS[resource as ResourceType];
+        newResources[resource as ResourceType] = Math.min(
+          newResources[resource as ResourceType] + produced,
+          cap
+        );
+      }
+    }
+
+    return {
+      resources: newResources,
+      building: { ...building, working: true },
+    };
+  } else {
+    // No consumption - pure production (solar arrays, etc.)
+    let newResources = { ...resources };
+    for (const [resource, amount] of Object.entries(def.production)) {
+      if (amount && def.productionInterval > 0) {
+        const produced = (amount * building.level * 1.8 * deltaTime) / def.productionInterval;
+        const cap = RESOURCE_CAPS[resource as ResourceType];
+        newResources[resource as ResourceType] = Math.min(
+          newResources[resource as ResourceType] + produced,
+          cap
+        );
+      }
+    }
+
+    return {
+      resources: newResources,
+      building: { ...building, working: true },
+    };
+  }
+}
 
 // Reducer function
 function gameReducer(state: GameState, action: ExtendedGameAction): GameState {
@@ -60,20 +127,15 @@ function gameReducer(state: GameState, action: ExtendedGameAction): GameState {
       const { row, col } = action.payload;
       const plot = state.grid[row][col];
 
-      // If plot has a building, we don't collect directly from it
-      // Clicking is for placing buildings or manual collection from ice
       if (plot.building) {
         return state;
       }
 
-      // Manual ice collection from empty plots (1 ice per click)
+      // Manual ice collection (1-3 ice per click with level bonus)
       const collected = 1;
       return {
         ...state,
-        resources: {
-          ...state.resources,
-          ice: state.resources.ice + collected,
-        },
+        resources: addResource(state.resources, "ice", collected, RESOURCE_CAPS.ice),
         stats: {
           ...state.stats,
           totalClicks: state.stats.totalClicks + 1,
@@ -86,31 +148,27 @@ function gameReducer(state: GameState, action: ExtendedGameAction): GameState {
       const { row, col, buildingType } = action.payload;
       const plot = state.grid[row][col];
 
-      // Can't place on occupied plot
-      if (plot.building) {
+      if (plot.building || buildingType === "empty") {
         return state;
       }
 
       const buildingDef = BUILDINGS[buildingType];
 
-      // Check if can afford
       if (!canAfford(buildingDef.cost, state.resources)) {
         return state;
       }
 
-      // Deduct cost
       const newResources = deductCost(buildingDef.cost, state.resources);
 
-      // Create building
       const newBuilding: Building = {
-        id: `${buildingType}-${Date.now()}`,
+        id: `${buildingType}-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
         type: buildingType,
         position: { row, col },
         level: 1,
         placedAt: Date.now(),
+        working: true,
       };
 
-      // Update grid
       const newGrid = state.grid.map((r) => r.map((p) => ({ ...p })));
       newGrid[row][col].building = newBuilding;
 
@@ -134,7 +192,6 @@ function gameReducer(state: GameState, action: ExtendedGameAction): GameState {
         return state;
       }
 
-      // Update grid
       const newGrid = state.grid.map((r) => r.map((p) => ({ ...p })));
       newGrid[row][col].building = null;
 
@@ -149,25 +206,39 @@ function gameReducer(state: GameState, action: ExtendedGameAction): GameState {
 
     case "TICK": {
       const { deltaTime } = action.payload;
-      const newResources = { ...state.resources };
 
-      // Calculate production from all buildings
+      let currentResources = state.resources;
+      const updatedBuildings: Building[] = [];
+
       for (const building of state.buildings) {
-        const def = BUILDINGS[building.type];
-        const productionAmount = def.production;
-        const interval = def.productionInterval;
-
-        for (const [resource, amount] of Object.entries(productionAmount)) {
-          if (amount && interval > 0) {
-            const produced = (amount / interval) * deltaTime;
-            newResources[resource as ResourceType] += produced;
-          }
+        if (building.type === "empty") {
+          updatedBuildings.push(building);
+          continue;
         }
+
+        const result = processBuildingProduction(building, deltaTime, currentResources);
+        currentResources = result.resources;
+        updatedBuildings.push(result.building);
       }
+
+      // Update grid with updated buildings
+      const newGrid = state.grid.map((r) =>
+        r.map((p) => {
+          const updatedBuilding = updatedBuildings.find(
+            (b) => b.position.row === p.row && b.position.col === p.col
+          );
+          return {
+            ...p,
+            building: updatedBuilding || p.building,
+          };
+        })
+      );
 
       return {
         ...state,
-        resources: newResources,
+        resources: currentResources,
+        buildings: updatedBuildings,
+        grid: newGrid,
         stats: {
           ...state.stats,
           playTime: state.stats.playTime + deltaTime,
@@ -180,11 +251,11 @@ function gameReducer(state: GameState, action: ExtendedGameAction): GameState {
       const { buildingId } = action.payload;
       const building = state.buildings.find((b) => b.id === buildingId);
 
-      if (!building) {
+      if (!building || building.level >= 3) {
         return state;
       }
 
-      // Upgrade cost = base cost * level * 1.5 (design doc formula)
+      // Upgrade cost = base cost * level * 1.5
       const def = BUILDINGS[building.type];
       const upgradeCost: Partial<Record<ResourceType, number>> = {};
       for (const [resource, amount] of Object.entries(def.cost)) {
@@ -199,7 +270,6 @@ function gameReducer(state: GameState, action: ExtendedGameAction): GameState {
 
       const newResources = deductCost(upgradeCost, state.resources);
 
-      // Update building and grid
       const newBuildings = state.buildings.map((b) =>
         b.id === buildingId ? { ...b, level: b.level + 1 } : b
       );
@@ -223,12 +293,10 @@ function gameReducer(state: GameState, action: ExtendedGameAction): GameState {
 
     case "COLLECT_RESOURCE": {
       const { resourceType, amount } = action.payload;
+      const cap = RESOURCE_CAPS[resourceType];
       return {
         ...state,
-        resources: {
-          ...state.resources,
-          [resourceType]: state.resources[resourceType] + amount,
-        },
+        resources: addResource(state.resources, resourceType, amount, cap),
         stats: {
           ...state.stats,
           totalResourcesGathered: state.stats.totalResourcesGathered + amount,
@@ -238,7 +306,7 @@ function gameReducer(state: GameState, action: ExtendedGameAction): GameState {
 
     case "REMOVE_RESOURCE": {
       const { resource, amount } = action.payload;
-      const currentAmount = state.resources[resource as ResourceType] || 0;
+      const currentAmount = state.resources[resource] || 0;
       const newAmount = Math.max(0, currentAmount - amount);
       return {
         ...state,
@@ -251,25 +319,38 @@ function gameReducer(state: GameState, action: ExtendedGameAction): GameState {
 
     case "OFFLINE_PRODUCTION": {
       const { offlineTime } = action.payload;
-      const newResources = { ...state.resources };
 
-      // Calculate production from all buildings for offline time
+      let currentResources = state.resources;
+      const updatedBuildings: Building[] = [];
+
       for (const building of state.buildings) {
-        const def = BUILDINGS[building.type];
-        const productionAmount = def.production;
-        const interval = def.productionInterval;
-
-        for (const [resource, amount] of Object.entries(productionAmount)) {
-          if (amount && interval > 0) {
-            const produced = (amount / interval) * offlineTime;
-            newResources[resource as ResourceType] += produced;
-          }
+        if (building.type === "empty") {
+          updatedBuildings.push(building);
+          continue;
         }
+
+        const result = processBuildingProduction(building, offlineTime, currentResources);
+        currentResources = result.resources;
+        updatedBuildings.push({ ...result.building, working: true }); // Assume working when online
       }
+
+      const newGrid = state.grid.map((r) =>
+        r.map((p) => {
+          const updatedBuilding = updatedBuildings.find(
+            (b) => b.position.row === p.row && b.position.col === p.col
+          );
+          return {
+            ...p,
+            building: updatedBuilding || p.building,
+          };
+        })
+      );
 
       return {
         ...state,
-        resources: newResources,
+        resources: currentResources,
+        buildings: updatedBuildings,
+        grid: newGrid,
         stats: {
           ...state.stats,
           playTime: state.stats.playTime + offlineTime,
@@ -297,7 +378,6 @@ export const GameContext = createContext<GameContextValue | null>(null);
 
 // Provider component
 export function GameProvider({ children }: { children: React.ReactNode }) {
-  // Try to load saved state, otherwise use initial state
   const initialGameState = hasSave() ? loadGame() || initialState : initialState;
 
   const [state, dispatch] = useReducer(gameReducer, initialGameState);
@@ -311,29 +391,27 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
 
     const savedState = hasSave() ? loadGame() : null;
     if (savedState) {
-      const offlineTime = getOfflineTime(savedState.lastUpdate.toString());
+      const offlineTime = getOfflineTime(savedState.lastUpdate);
       if (offlineTime > 0) {
         dispatch({ type: "OFFLINE_PRODUCTION", payload: { offlineTime } });
       }
     }
   }, []);
 
-  // Autosave integration
   useAutosave(state);
 
   // Game loop
   useEffect(() => {
     const interval = setInterval(() => {
       const now = Date.now();
-      const deltaTime = (now - lastTickRef.current) / 1000; // convert to seconds
+      const deltaTime = (now - lastTickRef.current) / 1000;
       lastTickRef.current = now;
       dispatch({ type: "TICK", payload: { deltaTime } });
-    }, 100); // tick every 100ms
+    }, 100);
 
     return () => clearInterval(interval);
   }, []);
 
-  // Action creators
   const placeBuilding = useCallback((row: number, col: number, buildingType: BuildingType) => {
     dispatch({ type: "PLACE_BUILDING", payload: { row, col, buildingType } });
   }, []);
@@ -359,7 +437,6 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
   );
 }
 
-// Hook to use game context
 export function useGame() {
   const context = useContext(GameContext);
   if (!context) {

@@ -3,32 +3,46 @@
  * Implements core interfaces for the lunar colony idle clicker game.
  */
 
-// Resource types with available assets
-export type ResourceType = "ice" | "solarEnergy" | "helium3";
+// All 9 resource types
+export type ResourceType =
+  | "ice" | "regolith" | "solarEnergy"
+  | "water" | "oxygen" | "iron"
+  | "gold" | "helium3" | "lunarWheat";
 
 export interface ResourceDefinition {
   id: ResourceType;
   name: string;
   icon: string;
   description: string;
+  color: string; // UI color for displays
 }
 
 export interface ResourceState {
   ice: number;
+  regolith: number;
   solarEnergy: number;
+  water: number;
+  oxygen: number;
+  iron: number;
+  gold: number;
   helium3: number;
+  lunarWheat: number;
 }
 
-// Building types matching the preview code
-export type BuildingType = "drill" | "solar" | "water" | "dome" | "empty";
+// Building types
+export type BuildingType =
+  | "drill" | "solar" | "waterExtractor" | "greenhouse" | "oreProcessor" | "habitat" | "empty";
 
 export interface BuildingDefinition {
   type: BuildingType;
   name: string;
   icon: string;
-  cost: Partial<ResourceState>;
-  production: Partial<ResourceState>;
-  productionInterval: number; // seconds
+  description: string;
+  cost: Partial<ResourceState>; // Cost to build
+  production: Partial<ResourceState>; // Resources produced per cycle
+  consumption: Partial<ResourceState>; // Resources consumed per cycle
+  productionInterval: number; // seconds between production
+  consumptionInterval: number; // seconds between consumption
 }
 
 export interface Building {
@@ -37,6 +51,7 @@ export interface Building {
   position: { row: number; col: number };
   level: number;
   placedAt: number; // timestamp
+  working: boolean; // true if has enough to consume and produce
 }
 
 // Plot on the 7x7 grid
@@ -69,12 +84,32 @@ export type GameAction =
   | { type: "TICK"; payload: { deltaTime: number } }
   | { type: "UPGRADE_BUILDING"; payload: { buildingId: string } }
   | { type: "CLICK_PLOT"; payload: { row: number; col: number } }
-  | { type: "OFFLINE_PRODUCTION"; payload: { offlineTime: number } };
+  | { type: "OFFLINE_PRODUCTION"; payload: { offlineTime: number } }
+  | { type: "REMOVE_RESOURCE"; payload: { resource: ResourceType; amount: number } };
 
 // Constants
 export const GRID_SIZE = 7;
 export const INITIAL_RESOURCES: ResourceState = {
-  ice: 50,       // Starting resources to avoid softlock
-  solarEnergy: 20, // Can buy Solar (20 ice) or try for Drill (50 solarEnergy after collecting)
+  ice: 50,
+  regolith: 0,
+  solarEnergy: 20,
+  water: 0,
+  oxygen: 0,
+  iron: 0,
+  gold: 0,
   helium3: 0,
+  lunarWheat: 0,
+};
+
+// Resource caps (overflow is lost)
+export const RESOURCE_CAPS: Record<ResourceType, number> = {
+  ice: 1000,
+  regolith: 500,
+  solarEnergy: 500,
+  water: 500,
+  oxygen: 500,
+  iron: 300,
+  gold: 100,
+  helium3: 100,
+  lunarWheat: 200,
 };

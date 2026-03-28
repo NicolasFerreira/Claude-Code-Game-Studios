@@ -3,9 +3,10 @@
 import { useState } from 'react';
 import { useGame } from '@/context/GameContext';
 import { useGameSelector } from '@/hooks/useGameSelector';
+import { ResourceType } from '@/types/game';
 
 interface SellOption {
-  resource: string;
+  resource: ResourceType;
   label: string;
   icon: string;
   price: number; // helium3 per unit

@@ -41,10 +41,16 @@ export function useProductionRateSelector(resourceType: ResourceType): number {
   if (!context) {
     throw new Error("useProductionRateSelector must be used within a GameProvider");
   }
-  return useMemo(
-    () => calculateProductionRate(context.state.buildings, resourceType),
-    [context.state.buildings, resourceType]
-  );
+  return useMemo(() => {
+    let totalRate = 0;
+    for (const building of context.state.buildings) {
+      const rates = calculateProductionRate(building.type, building.level);
+      if (rates[resourceType]) {
+        totalRate += rates[resourceType]!;
+      }
+    }
+    return totalRate;
+  }, [context.state.buildings, resourceType]);
 }
 
 // Selector for a specific plot

@@ -22,8 +22,10 @@ const MAX_ZOOM = 2;
 const BUILDING_ASSETS: Record<BuildingType, string> = {
   drill: "/assets/buildings/ice-drill.png",
   solar: "/assets/buildings/solar-panel.png",
-  water: "/assets/buildings/water-extractor.png",
-  dome: "/assets/buildings/biodome.png",
+  waterExtractor: "/assets/buildings/water-extractor.png",
+  greenhouse: "/assets/buildings/biodome.png",
+  oreProcessor: "/assets/buildings/ore-processor.png",
+  habitat: "/assets/buildings/habitat.png",
   empty: "/assets/resources/ice.png",
 };
 
@@ -88,10 +90,11 @@ function GamePreview() {
   }, []);
 
   const buildingOptions: { type: BuildingType; src: string; label: string; cost: string }[] = [
-    { type: "drill", src: BUILDING_ASSETS.drill, label: "Drill", cost: "50⚡" },
-    { type: "solar", src: BUILDING_ASSETS.solar, label: "Solar", cost: "20🧊" },
-    { type: "water", src: BUILDING_ASSETS.water, label: "Water", cost: "100⚡ 30🧊" },
-    { type: "dome", src: BUILDING_ASSETS.dome, label: "Dome", cost: "200⚡ 100🧊" },
+    { type: "drill", src: BUILDING_ASSETS.drill, label: "Drill", cost: "30R 5Fe" },
+    { type: "solar", src: BUILDING_ASSETS.solar, label: "Solar", cost: "10R" },
+    { type: "waterExtractor", src: BUILDING_ASSETS.waterExtractor, label: "Water", cost: "20R 10Fe" },
+    { type: "greenhouse", src: BUILDING_ASSETS.greenhouse, label: "Dome", cost: "40Fe 20H2O" },
+    { type: "oreProcessor", src: BUILDING_ASSETS.oreProcessor, label: "Ore", cost: "50Fe" },
   ];
 
   return (
