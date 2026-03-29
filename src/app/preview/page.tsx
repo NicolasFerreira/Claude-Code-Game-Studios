@@ -20,6 +20,9 @@ import { EndgameScreen } from "@/components/game/EndgameScreen";
 import { ColonyLevelDisplay } from "@/components/game/ColonyLevelDisplay";
 import { QuestProvider, useQuests } from "@/context/QuestContext";
 import { QuestPanel } from "@/components/game/QuestPanel";
+import { CookingProvider } from "@/context/CookingContext";
+import { Kitchen } from "@/components/game/Kitchen";
+import { FoodInventory } from "@/components/game/FoodInventory";
 
 const CELL_SIZE = 64;
 const MIN_ZOOM = 0.5;
@@ -32,6 +35,7 @@ const BUILDING_ASSETS: Record<string, string> = {
   greenhouse: "/assets/buildings/biodome.png",
   oreProcessor: "/assets/buildings/ore-processor.png",
   habitat: "/assets/buildings/habitat.png",
+  kitchen: "/assets/buildings/biodome.png", // fallback
   empty: "/assets/resources/ice.png",
   // Advanced buildings
   deepCoreMine: "/assets/buildings/ore-processor.png", // fallback
@@ -123,6 +127,9 @@ function GamePreview() {
     { type: "greenhouse", src: BUILDING_ASSETS.greenhouse, label: "Dome", cost: "40Fe 20H2O" },
     { type: "oreProcessor", src: BUILDING_ASSETS.oreProcessor, label: "Ore", cost: "50Fe" },
   ];
+
+  const [kitchenOpen, setKitchenOpen] = useState(false);
+  const [foodInventoryOpen, setFoodInventoryOpen] = useState(false);
 
   return (
     <GameFrame title="ICE DRILL">
@@ -374,6 +381,12 @@ function GamePreview() {
       {/* Quest Panel */}
       <QuestPanel isOpen={questOpen} onClose={() => setQuestOpen(false)} />
 
+      {/* Kitchen Panel */}
+      <Kitchen isOpen={kitchenOpen} onClose={() => setKitchenOpen(false)} />
+
+      {/* Food Inventory Panel */}
+      <FoodInventory isOpen={foodInventoryOpen} onClose={() => setFoodInventoryOpen(false)} />
+
       {/* Endgame Screen */}
       <EndgameScreen isOpen={endgameOpen} onClose={() => setEndgameOpen(false)} />
 
@@ -422,6 +435,42 @@ function GamePreview() {
       >
         Quests
       </button>
+
+      {/* Kitchen Button */}
+      <button
+        onClick={() => setKitchenOpen(true)}
+        className="pixel-btn"
+        style={{
+          position: "fixed",
+          top: "160px",
+          right: "20px",
+          zIndex: 101,
+          padding: "8px 12px",
+          fontSize: "10px",
+          background: "#f97316",
+          border: "2px solid #fb923c",
+        }}
+      >
+        Kitchen
+      </button>
+
+      {/* Food Inventory Button */}
+      <button
+        onClick={() => setFoodInventoryOpen(true)}
+        className="pixel-btn"
+        style={{
+          position: "fixed",
+          top: "200px",
+          right: "20px",
+          zIndex: 101,
+          padding: "8px 12px",
+          fontSize: "10px",
+          background: "#334155",
+          border: "2px solid #475569",
+        }}
+      >
+        Food
+      </button>
     </GameFrame>
   );
 }
@@ -432,9 +481,11 @@ export default function PreviewPage() {
       <GameProvider>
         <AchievementProvider>
           <QuestProvider>
-            <GamePreview />
-            <Notifications />
-            <FloatingTextContainer />
+            <CookingProvider>
+              <GamePreview />
+              <Notifications />
+              <FloatingTextContainer />
+            </CookingProvider>
           </QuestProvider>
         </AchievementProvider>
       </GameProvider>

@@ -115,3 +115,25 @@ export const RESOURCE_CAPS: Record<ResourceType, number> = {
   helium3: 100,
   lunarWheat: 200,
 };
+
+// Food buffs
+export type BuffType = "speed" | "luck" | "efficiency";
+
+export interface FoodItem {
+  id: string;
+  name: string;
+  icon: string;
+  description: string;
+  ingredients: Partial<ResourceState>;
+  duration: number; // seconds, 0 = no expiration
+  buffType: BuffType;
+  buffValue: number; // percentage, e.g., 10 = +10%
+}
+
+// Food inventory item with timestamp
+export interface FoodInventoryItem {
+  itemId: string;
+  food: FoodItem;
+  obtainedAt: number;
+  expiresAt: number | null; // null = no expiration
+}
