@@ -53,10 +53,11 @@ const initialState: GameState = {
   },
   lastUpdate: Date.now(),
   expansionLevel: 0,
+  toolLevel: 1,
 };
 
 // Extended action type
-type ExtendedGameAction = GameAction | { type: "REMOVE_RESOURCE"; payload: { resource: ResourceType; amount: number } };
+type ExtendedGameAction = GameAction | { type: "REMOVE_RESOURCE"; payload: { resource: ResourceType; amount: number } } | { type: "UPGRADE_TOOL" };
 
 // Process production for a single building
 function processBuildingProduction(
@@ -144,8 +145,8 @@ function gameReducer(state: GameState, action: ExtendedGameAction): GameState {
         return state;
       }
 
-      // Manual ice collection (1-3 ice per click with level bonus)
-      const collected = 1;
+      // Manual ice collection with tool bonus (+15% per tool level)
+      const collected = Math.floor(1 * (1 + 0.15 * state.toolLevel));
       return {
         ...state,
         resources: addResource(state.resources, "ice", collected, RESOURCE_CAPS.ice),
@@ -401,6 +402,14 @@ function gameReducer(state: GameState, action: ExtendedGameAction): GameState {
         resources: newResources,
         grid: newGrid,
         expansionLevel: level,
+      };
+    }
+
+    case "UPGRADE_TOOL": {
+      if (state.toolLevel >= 10) return state;
+      return {
+        ...state,
+        toolLevel: state.toolLevel + 1,
       };
     }
 

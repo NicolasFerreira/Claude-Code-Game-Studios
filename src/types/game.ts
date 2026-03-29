@@ -75,6 +75,7 @@ export interface GameState {
   };
   lastUpdate: number; // timestamp
   expansionLevel: number; // 0 = 7x7, 1 = 9x9, 2 = 11x11, 3 = 13x13
+  toolLevel: number; // 1-10, affects click power
 }
 
 // Actions for the reducer
@@ -87,7 +88,8 @@ export type GameAction =
   | { type: "CLICK_PLOT"; payload: { row: number; col: number } }
   | { type: "OFFLINE_PRODUCTION"; payload: { offlineTime: number } }
   | { type: "REMOVE_RESOURCE"; payload: { resource: ResourceType; amount: number } }
-  | { type: "EXPAND_COLONY"; payload: { level: number } };
+  | { type: "EXPAND_COLONY"; payload: { level: number } }
+  | { type: "UPGRADE_TOOL" };
 
 // Constants
 export const GRID_SIZE = 7;

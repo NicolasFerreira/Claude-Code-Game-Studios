@@ -23,6 +23,8 @@ import { QuestPanel } from "@/components/game/QuestPanel";
 import { CookingProvider } from "@/context/CookingContext";
 import { Kitchen } from "@/components/game/Kitchen";
 import { FoodInventory } from "@/components/game/FoodInventory";
+import { ToolUpgradeProvider } from "@/context/ToolUpgradeContext";
+import { ToolUpgradePanel } from "@/components/game/ToolUpgradePanel";
 
 const CELL_SIZE = 64;
 const MIN_ZOOM = 0.5;
@@ -130,6 +132,7 @@ function GamePreview() {
 
   const [kitchenOpen, setKitchenOpen] = useState(false);
   const [foodInventoryOpen, setFoodInventoryOpen] = useState(false);
+  const [toolUpgradeOpen, setToolUpgradeOpen] = useState(false);
 
   return (
     <GameFrame title="ICE DRILL">
@@ -387,6 +390,9 @@ function GamePreview() {
       {/* Food Inventory Panel */}
       <FoodInventory isOpen={foodInventoryOpen} onClose={() => setFoodInventoryOpen(false)} />
 
+      {/* Tool Upgrade Panel */}
+      <ToolUpgradePanel isOpen={toolUpgradeOpen} onClose={() => setToolUpgradeOpen(false)} />
+
       {/* Endgame Screen */}
       <EndgameScreen isOpen={endgameOpen} onClose={() => setEndgameOpen(false)} />
 
@@ -471,6 +477,24 @@ function GamePreview() {
       >
         Food
       </button>
+
+      {/* Tool Upgrade Button */}
+      <button
+        onClick={() => setToolUpgradeOpen(true)}
+        className="pixel-btn"
+        style={{
+          position: "fixed",
+          top: "240px",
+          right: "20px",
+          zIndex: 101,
+          padding: "8px 12px",
+          fontSize: "10px",
+          background: "#a78bfa",
+          border: "2px solid #c4b5fd",
+        }}
+      >
+        Tool
+      </button>
     </GameFrame>
   );
 }
@@ -482,9 +506,11 @@ export default function PreviewPage() {
         <AchievementProvider>
           <QuestProvider>
             <CookingProvider>
-              <GamePreview />
-              <Notifications />
-              <FloatingTextContainer />
+              <ToolUpgradeProvider>
+                <GamePreview />
+                <Notifications />
+                <FloatingTextContainer />
+              </ToolUpgradeProvider>
             </CookingProvider>
           </QuestProvider>
         </AchievementProvider>
