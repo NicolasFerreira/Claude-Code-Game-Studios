@@ -118,15 +118,15 @@ function GamePreview() {
       {/* HUD with Trade button */}
       <HUD onOpenTrade={() => setTradeOpen(true)} />
 
-      {/* Building Selector */}
+      {/* Building Selector - RIGHT side, vertical stack */}
       <div
         className="pixel-panel"
         style={{
           position: "fixed",
-          top: "80px",
-          left: "50%",
-          transform: "translateX(-50%)",
+          top: "130px",
+          right: "20px",
           display: "flex",
+          flexDirection: "column",
           gap: "8px",
           padding: "12px",
           zIndex: 100,
@@ -279,11 +279,11 @@ function GamePreview() {
         </div>
       </div>
 
-      {/* Zoom Controls */}
+      {/* Zoom Controls - LEFT side */}
       <div
         style={{
           position: "fixed",
-          right: "20px",
+          left: "20px",
           top: "50%",
           transform: "translateY(-50%)",
           display: "flex",
@@ -382,7 +382,7 @@ function GamePreview() {
           position: "fixed",
           top: "80px",
           right: "20px",
-          zIndex: 100,
+          zIndex: 101,
           padding: "8px 12px",
           fontSize: "10px",
         }}
