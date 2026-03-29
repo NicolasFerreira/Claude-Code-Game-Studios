@@ -4,6 +4,9 @@ import { Canvas } from "@react-three/fiber";
 import { OrbitControls, Stars } from "@react-three/drei";
 import { Asteroid } from "./Asteroid";
 import { Lights } from "./Lights";
+import { VoxelGrid } from "./VoxelGrid";
+import { PlacedBuildings } from "./PlacedBuildings";
+import { BuildingGhost } from "./BuildingGhost";
 
 export function CanvasWrapper() {
   return (
@@ -13,6 +16,9 @@ export function CanvasWrapper() {
         <Stars radius={100} depth={50} count={5000} factor={4} fade speed={1} />
         <Lights />
         <Asteroid />
+        <VoxelGrid />
+        <PlacedBuildings />
+        <BuildingGhost />
         <OrbitControls
           enableDamping
           dampingFactor={0.05}
