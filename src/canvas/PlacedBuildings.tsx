@@ -8,14 +8,18 @@ export function PlacedBuildings() {
   const grid = useGameSelector((s) => s.grid);
 
   // Get position for each building from grid
+  // Uses the same coordinate mapping as Asteroid.cellIdToGridPos
   const getBuildingPosition = (buildingId: string): [number, number, number] | null => {
     for (const row of grid) {
       for (const cell of row) {
         if (cell.building?.id === buildingId) {
           const radius = 10 + 0.5;
-          const x = Math.round(radius * Math.sin(cell.row * 0.3) * Math.cos(cell.col * 0.3));
-          const y = Math.round(radius * Math.cos(cell.row * 0.3));
-          const z = Math.round(radius * Math.sin(cell.row * 0.3) * Math.sin(cell.col * 0.3));
+          // Match the coordinate mapping used in Asteroid.tsx cellIdToGridPos
+          const theta = Math.PI / 6 + cell.row * (Math.PI * 2 / 3 / 7) + (Math.PI * 2 / 3 / 7) / 2;
+          const phi = cell.col * (Math.PI * 2 / 7) + (Math.PI * 2 / 7) / 2;
+          const x = Math.round(radius * Math.sin(theta) * Math.cos(phi));
+          const y = Math.round(radius * Math.cos(theta));
+          const z = Math.round(radius * Math.sin(theta) * Math.sin(phi));
           return [x, y + 1, z];
         }
       }
