@@ -20,7 +20,32 @@ export function BuildingInfoPanel({ building, isOpen, onClose }: BuildingInfoPan
 
   const def = isAdvancedBuilding(building.type)
     ? ADVANCED_BUILDINGS[building.type as keyof typeof ADVANCED_BUILDINGS]
-    : BUILDINGS[building.type];
+    : BUILDINGS[building.type as keyof typeof BUILDINGS];
+
+  // Guard against unknown building types
+  if (!def) {
+    return (
+      <div
+        style={{
+          position: "fixed",
+          top: 0,
+          right: 0,
+          height: "100vh",
+          width: "320px",
+          background: "rgba(13, 13, 26, 0.95)",
+          borderLeft: "4px solid #334155",
+          zIndex: 200,
+        }}
+      >
+        <div className="pixel-panel" style={{ margin: "16px", padding: "16px" }}>
+          <p style={{ color: "#ef4444" }}>Unknown building type: {building.type}</p>
+          <button onClick={onClose} className="pixel-btn" style={{ marginTop: "16px" }}>
+            Close
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   // Production rate per second with level multiplier (design doc formula: level * 1.8)
   const productionRate = Object.entries(def.production).reduce((acc, [resource, amount]) => {

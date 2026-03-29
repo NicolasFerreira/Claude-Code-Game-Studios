@@ -23,7 +23,7 @@ const CELL_SIZE = 64;
 const MIN_ZOOM = 0.5;
 const MAX_ZOOM = 2;
 
-const BUILDING_ASSETS: Record<BuildingType, string> = {
+const BUILDING_ASSETS: Record<string, string> = {
   drill: "/assets/buildings/ice-drill.png",
   solar: "/assets/buildings/solar-panel.png",
   waterExtractor: "/assets/buildings/water-extractor.png",
@@ -31,7 +31,15 @@ const BUILDING_ASSETS: Record<BuildingType, string> = {
   oreProcessor: "/assets/buildings/ore-processor.png",
   habitat: "/assets/buildings/habitat.png",
   empty: "/assets/resources/ice.png",
+  // Advanced buildings
+  deepCoreMine: "/assets/buildings/ore-processor.png", // fallback
+  fusionReactor: "/assets/buildings/solar-panel.png", // fallback
+  helium3Extractor: "/assets/buildings/water-extractor.png", // fallback
+  assembler: "/assets/buildings/biodome.png", // fallback
+  researchLab: "/assets/buildings/biodome.png", // fallback
 };
+
+const FALLBACK_ICON = "/assets/resources/ice.png";
 
 function GamePreview() {
   const { clickPlot, placeBuilding } = useGame();
@@ -254,11 +262,12 @@ function GamePreview() {
                   >
                     {plot.building ? (
                       <Image
-                        src={BUILDING_ASSETS[plot.building.type]}
+                        src={BUILDING_ASSETS[plot.building.type] || FALLBACK_ICON}
                         alt={plot.building.type}
                         width={56}
                         height={56}
                         style={{ imageRendering: "pixelated" }}
+                        onError={(e) => { e.currentTarget.src = FALLBACK_ICON; }}
                       />
                     ) : (
                       <div
