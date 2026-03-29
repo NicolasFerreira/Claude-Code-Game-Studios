@@ -25,6 +25,7 @@ import { Kitchen } from "@/components/game/Kitchen";
 import { FoodInventory } from "@/components/game/FoodInventory";
 import { ToolUpgradeProvider } from "@/context/ToolUpgradeContext";
 import { ToolUpgradePanel } from "@/components/game/ToolUpgradePanel";
+import { InventoryPanel } from "@/components/game/InventoryPanel";
 
 const CELL_SIZE = 64;
 const MIN_ZOOM = 0.5;
@@ -133,6 +134,7 @@ function GamePreview() {
   const [kitchenOpen, setKitchenOpen] = useState(false);
   const [foodInventoryOpen, setFoodInventoryOpen] = useState(false);
   const [toolUpgradeOpen, setToolUpgradeOpen] = useState(false);
+  const [inventoryOpen, setInventoryOpen] = useState(false);
 
   return (
     <GameFrame title="ICE DRILL">
@@ -393,6 +395,9 @@ function GamePreview() {
       {/* Tool Upgrade Panel */}
       <ToolUpgradePanel isOpen={toolUpgradeOpen} onClose={() => setToolUpgradeOpen(false)} />
 
+      {/* Inventory Panel */}
+      <InventoryPanel isOpen={inventoryOpen} onClose={() => setInventoryOpen(false)} />
+
       {/* Endgame Screen */}
       <EndgameScreen isOpen={endgameOpen} onClose={() => setEndgameOpen(false)} />
 
@@ -494,6 +499,24 @@ function GamePreview() {
         }}
       >
         Tool
+      </button>
+
+      {/* Inventory Button */}
+      <button
+        onClick={() => setInventoryOpen(true)}
+        className="pixel-btn"
+        style={{
+          position: "fixed",
+          top: "280px",
+          right: "20px",
+          zIndex: 101,
+          padding: "8px 12px",
+          fontSize: "10px",
+          background: "#22d3ee",
+          border: "2px solid #67e8f9",
+        }}
+      >
+        Bag
       </button>
     </GameFrame>
   );
