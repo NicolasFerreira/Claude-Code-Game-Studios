@@ -7,6 +7,8 @@ import { AchievementProvider } from "@/context/AchievementContext";
 import { QuestProvider } from "@/context/QuestContext";
 import { CookingProvider } from "@/context/CookingContext";
 import { ToolUpgradeProvider } from "@/context/ToolUpgradeContext";
+import { ResourceBar } from "@/components/ui/ResourceBar";
+import { BuildingMenu3D } from "@/components/ui/BuildingMenu3D";
 
 // Dynamic import for 3D canvas (no SSR)
 const CanvasWrapper = dynamic(() => import("@/canvas/CanvasWrapper").then(m => ({ default: m.CanvasWrapper })), {
@@ -37,6 +39,8 @@ export default function PreviewPage() {
               <ToolUpgradeProvider>
                 <div style={{ width: "100vw", height: "100vh", overflow: "hidden" }}>
                   <CanvasWrapper />
+                  <ResourceBar />
+                  <BuildingMenu3D />
                 </div>
               </ToolUpgradeProvider>
             </CookingProvider>
