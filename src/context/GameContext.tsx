@@ -5,7 +5,7 @@
 
 "use client";
 
-import React, { createContext, useContext, useReducer, useCallback, useEffect, useRef } from "react";
+import React, { createContext, useContext, useReducer, useCallback, useEffect, useRef, useState } from "react";
 import {
   GameState,
   GameAction,
@@ -135,6 +135,9 @@ function gameReducer(state: GameState, action: ExtendedGameAction): GameState {
   switch (action.type) {
     case "CLICK_PLOT": {
       const { row, col } = action.payload;
+      if (row < 0 || row >= state.grid.length || col < 0 || col >= state.grid[0].length) {
+        return state;
+      }
       const plot = state.grid[row][col];
 
       if (plot.building) {
@@ -156,6 +159,9 @@ function gameReducer(state: GameState, action: ExtendedGameAction): GameState {
 
     case "PLACE_BUILDING": {
       const { row, col, buildingType } = action.payload;
+      if (row < 0 || row >= state.grid.length || col < 0 || col >= state.grid[0].length) {
+        return state;
+      }
       const plot = state.grid[row][col];
 
       if (plot.building || buildingType === "empty") {
@@ -196,6 +202,9 @@ function gameReducer(state: GameState, action: ExtendedGameAction): GameState {
 
     case "REMOVE_BUILDING": {
       const { row, col } = action.payload;
+      if (row < 0 || row >= state.grid.length || col < 0 || col >= state.grid[0].length) {
+        return state;
+      }
       const plot = state.grid[row][col];
 
       if (!plot.building) {
@@ -374,10 +383,22 @@ function gameReducer(state: GameState, action: ExtendedGameAction): GameState {
       const expansion = EXPANSIONS[level];
       if (!expansion) return state;
 
+      // Deduct expansion cost
+      let newResources = { ...state.resources };
+      for (const [resource, amount] of Object.entries(expansion.cost)) {
+        if (amount) {
+          newResources[resource as ResourceType] = Math.max(
+            0,
+            newResources[resource as ResourceType] - amount
+          );
+        }
+      }
+
       const newGrid = createInitialGrid(expansion.gridSize);
 
       return {
         ...state,
+        resources: newResources,
         grid: newGrid,
         expansionLevel: level,
       };
@@ -402,19 +423,25 @@ export const GameContext = createContext<GameContextValue | null>(null);
 
 // Provider component
 export function GameProvider({ children }: { children: React.ReactNode }) {
-  const initialGameState = hasSave() ? loadGame() || initialState : initialState;
+  // Load saved state once at initialization
+  const [initialGameState] = useState(() => {
+    const saved = hasSave() ? loadGame() : null;
+    return saved || initialState;
+  });
 
   const [state, dispatch] = useReducer(gameReducer, initialGameState);
   const lastTickRef = useRef<number>(Date.now());
   const initializedRef = useRef<boolean>(false);
+  const initialStateRef = useRef(initialGameState);
 
   // Initialize: process offline production if applicable
   useEffect(() => {
     if (initializedRef.current) return;
     initializedRef.current = true;
 
-    const savedState = hasSave() ? loadGame() : null;
-    if (savedState) {
+    const savedState = initialStateRef.current;
+    // Only process offline if we actually loaded a save (not initial state)
+    if (savedState !== initialState) {
       const offlineTime = getOfflineTime(savedState.lastUpdate);
       if (offlineTime > 0) {
         dispatch({ type: "OFFLINE_PRODUCTION", payload: { offlineTime } });

@@ -34,10 +34,9 @@ export function AchievementProvider({ children }: { children: React.ReactNode })
     buildingsPlaced: state.stats.buildingsPlaced,
     totalResourcesGathered: state.stats.totalResourcesGathered,
     playTime: state.stats.playTime,
-    highestLevel: Math.max(
-      ...state.buildings.map((b) => b.level),
-      0
-    ),
+    highestLevel: state.buildings.length > 0
+      ? Math.max(...state.buildings.map((b) => b.level))
+      : 0,
     buildingsByType: state.buildings.reduce<Record<string, number>>((acc, b) => {
       acc[b.type] = (acc[b.type] || 0) + 1;
       return acc;
@@ -55,9 +54,7 @@ export function AchievementProvider({ children }: { children: React.ReactNode })
       setUnlockedIds((prev) => [...prev, newAchievement.id]);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [achievementStats.buildingsPlaced, achievementStats.totalResourcesGathered,
-      achievementStats.playTime, achievementStats.hasSoldResources,
-      achievementStats.hasExpanded, achievementStats.hasUpgradedBuilding]);
+  }, [achievementStats]);
 
   const dismissAchievement = useCallback(() => {
     setRecentAchievement(null);

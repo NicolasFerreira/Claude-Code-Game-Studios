@@ -69,7 +69,7 @@ export function ColonyLevelDisplay() {
           textAlign: "center",
         }}
       >
-        {LEVEL_NAMES[progress.level] || "Unknown"}
+        {LEVEL_NAMES[progress.level] || `Level ${progress.level}`}
       </div>
 
       {/* XP Bar */}

@@ -2,6 +2,7 @@
 
 import { useGame } from "@/context/GameContext";
 import { BUILDINGS } from "@/systems/ResourceSystem";
+import { isAdvancedBuilding, ADVANCED_BUILDINGS } from "@/systems/AdvancedBuildings";
 import { Building, ResourceType } from "@/types/game";
 
 interface BuildingInfoPanelProps {
@@ -17,7 +18,9 @@ export function BuildingInfoPanel({ building, isOpen, onClose }: BuildingInfoPan
 
   if (!isOpen || !building) return null;
 
-  const def = BUILDINGS[building.type];
+  const def = isAdvancedBuilding(building.type)
+    ? ADVANCED_BUILDINGS[building.type as keyof typeof ADVANCED_BUILDINGS]
+    : BUILDINGS[building.type];
 
   // Production rate per second with level multiplier (design doc formula: level * 1.8)
   const productionRate = Object.entries(def.production).reduce((acc, [resource, amount]) => {

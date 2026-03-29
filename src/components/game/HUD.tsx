@@ -4,7 +4,8 @@ import { useGameSelector } from "@/hooks/useGameSelector";
 import { RESOURCES } from "@/systems/ResourceSystem";
 import { ResourceType } from "@/types/game";
 
-function formatNumber(n: number): string {
+function formatNumber(n: number | undefined | null): string {
+  if (n == null) return "0";
   if (n >= 1000000) return (n / 1000000).toFixed(1) + "M";
   if (n >= 1000) return (n / 1000).toFixed(1) + "K";
   if (n >= 100) return Math.floor(n).toString();
