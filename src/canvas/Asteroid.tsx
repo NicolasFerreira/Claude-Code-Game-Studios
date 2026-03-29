@@ -2,6 +2,8 @@
 
 import { useMemo } from "react";
 import * as THREE from "three";
+import { VoxelGrid } from "./VoxelGrid";
+import { useWorldStore } from "@/stores/worldStore";
 
 export function Asteroid() {
   const voxels = useMemo(() => {
@@ -27,6 +29,18 @@ export function Asteroid() {
     return v;
   }, []);
 
+  const { setHoveredCell, setSelectedCell, setGhostPosition } = useWorldStore();
+
+  const handleCellClick = (cell: { id: string; position: [number, number, number] }) => {
+    setSelectedCell(cell.id);
+    setGhostPosition(cell.position);
+  };
+
+  const handleCellHover = (cell: { id: string; position: [number, number, number] } | null) => {
+    setHoveredCell(cell?.id ?? null);
+    setGhostPosition(cell?.position ?? null);
+  };
+
   return (
     <group>
       {voxels.map((v, i) => (
@@ -35,6 +49,7 @@ export function Asteroid() {
           <meshStandardMaterial color={v.color} roughness={0.9} />
         </mesh>
       ))}
+      <VoxelGrid onCellClick={handleCellClick} onCellHover={handleCellHover} />
     </group>
   );
 }
