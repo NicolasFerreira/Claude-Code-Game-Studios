@@ -20,6 +20,7 @@ import {
 } from "@/types/game";
 import { BUILDINGS, canAfford, canConsume, deductCost, addResource } from "@/systems/ResourceSystem";
 import { EXPANSIONS } from "@/systems/LandExpansion";
+import { isAdvancedBuilding, ADVANCED_BUILDINGS } from "@/systems/AdvancedBuildings";
 import { loadGame, getOfflineTime, hasSave } from "@/systems/SaveSystem";
 import { useAutosave } from "@/hooks/useAutosave";
 
@@ -63,7 +64,14 @@ function processBuildingProduction(
   deltaTime: number,
   resources: ResourceState
 ): { resources: ResourceState; building: Building } {
-  const def = BUILDINGS[building.type];
+  // Check if it's an advanced building
+  const isAdvanced = isAdvancedBuilding(building.type);
+  const def = isAdvanced ? ADVANCED_BUILDINGS[building.type as keyof typeof ADVANCED_BUILDINGS] : BUILDINGS[building.type];
+
+  // If no definition found, building doesn't produce
+  if (!def) {
+    return { resources, building: { ...building, working: false } };
+  }
 
   // Check if building has consumption requirements
   if (Object.keys(def.consumption).length > 0) {
