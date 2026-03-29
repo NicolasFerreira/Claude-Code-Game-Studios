@@ -18,6 +18,8 @@ import { ExpansionPanel } from "@/components/game/ExpansionPanel";
 import { AchievementProvider, useAchievements } from "@/context/AchievementContext";
 import { EndgameScreen } from "@/components/game/EndgameScreen";
 import { ColonyLevelDisplay } from "@/components/game/ColonyLevelDisplay";
+import { QuestProvider, useQuests } from "@/context/QuestContext";
+import { QuestPanel } from "@/components/game/QuestPanel";
 
 const CELL_SIZE = 64;
 const MIN_ZOOM = 0.5;
@@ -53,6 +55,7 @@ function GamePreview() {
   const [buildingInfoBuilding, setBuildingInfoBuilding] = useState<Building | null>(null);
   const [expansionOpen, setExpansionOpen] = useState(false);
   const [endgameOpen, setEndgameOpen] = useState(false);
+  const [questOpen, setQuestOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
   const grid = useGameSelector((s) => s.grid);
@@ -368,6 +371,9 @@ function GamePreview() {
       {/* Expansion Panel */}
       <ExpansionPanel isOpen={expansionOpen} onClose={() => setExpansionOpen(false)} />
 
+      {/* Quest Panel */}
+      <QuestPanel isOpen={questOpen} onClose={() => setQuestOpen(false)} />
+
       {/* Endgame Screen */}
       <EndgameScreen isOpen={endgameOpen} onClose={() => setEndgameOpen(false)} />
 
@@ -398,6 +404,24 @@ function GamePreview() {
       >
         Expand
       </button>
+
+      {/* Quest Button */}
+      <button
+        onClick={() => setQuestOpen(true)}
+        className="pixel-btn"
+        style={{
+          position: "fixed",
+          top: "120px",
+          right: "20px",
+          zIndex: 101,
+          padding: "8px 12px",
+          fontSize: "10px",
+          background: "#10b981",
+          border: "2px solid #34d399",
+        }}
+      >
+        Quests
+      </button>
     </GameFrame>
   );
 }
@@ -407,9 +431,11 @@ export default function PreviewPage() {
     <NotificationProvider>
       <GameProvider>
         <AchievementProvider>
-          <GamePreview />
-          <Notifications />
-          <FloatingTextContainer />
+          <QuestProvider>
+            <GamePreview />
+            <Notifications />
+            <FloatingTextContainer />
+          </QuestProvider>
         </AchievementProvider>
       </GameProvider>
     </NotificationProvider>
