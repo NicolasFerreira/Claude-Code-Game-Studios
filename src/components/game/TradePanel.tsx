@@ -38,6 +38,9 @@ export function TradePanel({ isOpen, onClose }: TradePanelProps) {
 
     if (toSell < option.minAmount) return;
 
+    // Track achievement: player has sold resources
+    localStorage.setItem("ice_drill_has_sold", "true");
+
     const earned = toSell * option.price;
     dispatch({
       type: 'COLLECT_RESOURCE',

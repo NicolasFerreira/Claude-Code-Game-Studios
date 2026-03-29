@@ -15,6 +15,9 @@ import { BuildingInfoPanel } from "@/components/game/BuildingInfoPanel";
 import { Building } from "@/types/game";
 import { TutorialHints } from "@/components/game/TutorialHints";
 import { ExpansionPanel } from "@/components/game/ExpansionPanel";
+import { AchievementProvider, useAchievements } from "@/context/AchievementContext";
+import { EndgameScreen } from "@/components/game/EndgameScreen";
+import { ColonyLevelDisplay } from "@/components/game/ColonyLevelDisplay";
 
 const CELL_SIZE = 64;
 const MIN_ZOOM = 0.5;
@@ -32,6 +35,7 @@ const BUILDING_ASSETS: Record<BuildingType, string> = {
 
 function GamePreview() {
   const { clickPlot, placeBuilding } = useGame();
+  const { unlockedIds } = useAchievements();
   const [pan, setPan] = useState({ x: 0, y: 0 });
   const [zoom, setZoom] = useState(1);
   const [isDragging, setIsDragging] = useState(false);
@@ -40,6 +44,7 @@ function GamePreview() {
   const [tradeOpen, setTradeOpen] = useState(false);
   const [buildingInfoBuilding, setBuildingInfoBuilding] = useState<Building | null>(null);
   const [expansionOpen, setExpansionOpen] = useState(false);
+  const [endgameOpen, setEndgameOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
   const grid = useGameSelector((s) => s.grid);
@@ -91,6 +96,14 @@ function GamePreview() {
     window.addEventListener("mouseup", handleGlobalMouseUp);
     return () => window.removeEventListener("mouseup", handleGlobalMouseUp);
   }, []);
+
+  // Show endgame screen when all achievements unlocked
+  const totalAchievements = 10; // ACHIEVEMENTS.length
+  useEffect(() => {
+    if (unlockedIds.length >= totalAchievements && !endgameOpen) {
+      setEndgameOpen(true);
+    }
+  }, [unlockedIds.length, endgameOpen]);
 
   const buildingOptions: { type: BuildingType; src: string; label: string; cost: string }[] = [
     { type: "drill", src: BUILDING_ASSETS.drill, label: "Drill", cost: "30R 5Fe" },
@@ -346,6 +359,21 @@ function GamePreview() {
       {/* Expansion Panel */}
       <ExpansionPanel isOpen={expansionOpen} onClose={() => setExpansionOpen(false)} />
 
+      {/* Endgame Screen */}
+      <EndgameScreen isOpen={endgameOpen} onClose={() => setEndgameOpen(false)} />
+
+      {/* Colony Level Display */}
+      <div
+        style={{
+          position: "fixed",
+          bottom: "80px",
+          left: "20px",
+          zIndex: 100,
+        }}
+      >
+        <ColonyLevelDisplay />
+      </div>
+
       {/* Expand Button */}
       <button
         onClick={() => setExpansionOpen(true)}
@@ -369,9 +397,11 @@ export default function PreviewPage() {
   return (
     <NotificationProvider>
       <GameProvider>
-        <GamePreview />
-        <Notifications />
-        <FloatingTextContainer />
+        <AchievementProvider>
+          <GamePreview />
+          <Notifications />
+          <FloatingTextContainer />
+        </AchievementProvider>
       </GameProvider>
     </NotificationProvider>
   );

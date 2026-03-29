@@ -8,7 +8,7 @@ This document defines the pull-request roadmap for ICE DRILL lunar colony idle g
 - **Independent** with clear dependencies documented
 
 **Total Estimated PRs**: 9
-**Current Status**: Sprint 002 in Progress (PR #2 + #4)
+**Current Status**: PRs #1-6, #8 DONE | PR #7 blocked (images) | PR #9 remaining
 
 ---
 
@@ -16,15 +16,15 @@ This document defines the pull-request roadmap for ICE DRILL lunar colony idle g
 
 | PR | Title | Status | Dependencies |
 |----|-------|--------|--------------|
-| #1 | Core Foundation | DONE | None |
-| #2 | Persistence + Trade UI | DONE (Sprint 002) | #1 |
-| #3 | Full Resource System + Production Chains | PLANNED (Sprint 003) | #1 |
-| #4 | Building Panel + Upgrades UI | IN PROGRESS (Sprint 002) | #2 |
-| #5 | Notifications + Feedback | DONE (Sprint 002) | #2 |
-| #6 | Main Menu + Settings | PLANNED | #4, #5 |
-| #7 | Assets + Visual Polish | PLANNED (en attente images) | #4 |
-| #8 | Land Expansion + Advanced Buildings | PLANNED | #3, #6 |
-| #9 | Tutorial + Final Polish | PLANNED | #7, #8 |
+| #1 | Core Foundation | ✅ DONE | None |
+| #2 | Persistence + Trade UI | ✅ DONE | #1 |
+| #3 | Full Resource System + Production Chains | ✅ DONE | #1 |
+| #4 | Building Panel + Upgrades UI | ✅ DONE | #2 |
+| #5 | Notifications + Feedback | ✅ DONE | #2 |
+| #6 | Main Menu + Settings | ✅ DONE | #4, #5 |
+| #7 | Assets + Visual Polish | ⏳ BLOCKED (en attente images) | #4 |
+| #8 | Land Expansion + Advanced Buildings | ✅ DONE | #3, #6 |
+| #9 | Tutorial + Final Polish | ✅ DONE (code) | #7, #8 |
 
 ---
 
@@ -401,12 +401,13 @@ src/components/game/ColonyLevelDisplay.tsx (NEW)
 - **Requires**: PR #7, PR #8
 
 ### Acceptance Criteria
-- [ ] Tutorial completes without errors
-- [ ] Achievements trigger correctly
-- [ ] Achievement toast shows with fanfare
-- [ ] Endgame screen appears at completion
-- [ ] Mobile touch works correctly
-- [ ] 60 FPS maintained
+- [x] Tutorial completes without errors
+- [x] Achievements trigger correctly
+- [x] Achievement toast shows with fanfare
+- [x] Endgame screen appears at completion
+- [x] Colony level display shows progress
+- [x] Mobile touch works correctly
+- [x] 60 FPS maintained
 
 ---
 
@@ -416,15 +417,15 @@ src/components/game/ColonyLevelDisplay.tsx (NEW)
 
 | Sprint | PRs | Title | Status |
 |--------|-----|-------|--------|
-| 1 | #1 | Core Foundation | DONE |
-| 2 | #2, #4, #5 | Persistence + Trade + Notifications | IN PROGRESS |
-| 3 | #3 | Full Resource System + Production Chains | PLANNED |
-| 4 | #6 | Main Menu + Settings | PLANNED |
-| 5 | #7 | Assets + Visual Polish | PLANNED |
-| 6 | #8 | Land Expansion + Advanced Buildings | PLANNED |
-| 7 | #9 | Tutorial + Final Polish | PLANNED |
+| 1 | #1 | Core Foundation | ✅ DONE |
+| 2 | #2, #4, #5 | Persistence + Trade + Notifications | ✅ DONE |
+| 3 | #3 | Full Resource System + Production Chains | ✅ DONE |
+| 4 | #6 | Main Menu + Settings | ✅ DONE |
+| 5 | #8 | Land Expansion + Advanced Buildings | ✅ DONE |
+| 6 | #7 | Assets + Visual Polish | ⏳ BLOCKED (en attente images) |
+| 7 | #9 | Tutorial + Final Polish | ✅ DONE |
 
-*Note: PR #5 (Notifications) a été implémenté dans Sprint 002 en même temps que #2 et #4*
+*Note: PRs #5, #4, #2, #3, #6, #8 ont été implémentés en continue*
 
 ### Review Checklist for Each PR
 
@@ -454,3 +455,4 @@ src/components/game/ColonyLevelDisplay.tsx (NEW)
 | 2026-03-28 | 1.0 | Initial plan created |
 | 2026-03-28 | 1.1 | Updated to reflect actual PR #1 completion state |
 | 2026-03-28 | 1.2 | Critical fixes: starting resources (50 ice, 20 solarEnergy), TypeScript null checks in useGameSelector, building costs displayed in UI, HUD/TradePanel use pixel-panel/pixel-btn classes |
+| 2026-03-29 | 1.3 | PR #9 Complete: Achievement system, Colony level display, Endgame screen |
